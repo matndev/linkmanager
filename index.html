@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LinkManager</title>
+    <meta charset="utf-8" />
+    <link href="style.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="webext/icons/linkmanager-logo-32.png"
+    />
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet"> -->
+    <script
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <script src="https://unpkg.com/rxjs@6.6.7/bundles/rxjs.umd.min.js"></script>
+    <script src="lib/pouchdb-7.2.1.min.js"></script>
+    <script src="lib/fetch-jsonp.js"></script>
+    <script src="lib/dayjs/dayjs.min.js"></script>
+    <script src="lib/dayjs/plugin/localizedFormat.js"></script>
+    <script src="utils/utils.js"></script>
+    <script src="db.js"></script>
+    <script src="utils/table.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body id="app" x-data="app()">
+    <header>
+      <h3>LinkManager v0.1.0</h3>
+      <form><input type="text" placeholder="find..." x-model="command" /></form>
+      <menu class="actions">
+        <button
+          class="toolbar-btn"
+          @click="addBookmark()"
+        >
+          <!-- Add / Import -->
+          <img
+            width="24"
+            height="24"
+            src="assets/img/icons/add_white_48dp.svg"
+            alt="add import"
+          />
+          <p class="tooltip">Add / Import</p>
+        </button>
+        <button class="toolbar-btn" @click="exportData()">
+          <!-- Export -->
+          <img
+            width="24"
+            height="24"
+            src="assets/img/icons/file_download_white_48dp.svg"
+            alt="export"
+          />
+          <p class="tooltip">Export</p>
+        </button>
+        <button class="toolbar-btn" @click="settings()">
+          <!-- Settings -->
+          <img
+            width="24"
+            height="24"
+            src="assets/img/icons/settings_white_48dp.svg"
+            alt="Settings"
+          />
+          <p class="tooltip">Settings</p>
+        </button>
+      </menu>
+    </header>
+
+    <template x-if="isModalOpen">
+      <div id="open-modal" class="modal-window">
+        <div>
+          <a @click="isModalOpen = false" title="Close" class="modal-close"
+            >Close</a
+          >
+          <!-- ADD BOOKMARK -->
+          <template x-if="flagNewBookmark">
+            <div>
+              <h1>Add / Import bookmarks</h1>
+              <form id="add-modal">
+                <div>
+                  <label for="raw">Raw</label>
+                  <input
+                    type="radio"
+                    id="raw"
+                    name="raw"
+                    value="raw"
+                    @click="addType='raw'"
+                    checked
+                  />
+
+                  <label for="importData">Import</label>
+                  <input
+                    type="radio"
+                    id="importData"
+                    name="importData"
+                    value="importData"
+                    @click="addType='import'"
+                  />
+
+                  <label for="manual">Manual</label>
+                  <input
+                    type="radio"
+                    id="manual"
+                    name="manual"
+                    value="manual"
+                    @click="addType='manual'"
+                  />
+                </div>
+                <template x-if="addType==='raw' || addType==='import'">
+                  <div style="width: 100%; height: 100%">
+                    <textarea
+                      id="rawpaste"
+                      name="rawpaste"
+                      rows="5"
+                      cols="5"
+                      x-model="rawpaste"
+                      required
+                    ></textarea>
+                  </div>
+                </template>
+                <template x-if="addType==='manual'">
+                  <div
+                    style="
+                      width: 100%;
+                      height: 100%;
+                      display: flex;
+                      flex-direction: column;
+                    "
+                  >
+                    <label for="manualpasteURL">URL</label>
+                    <input
+                      type="text"
+                      id="manualpasteURL"
+                      name="manualpasteURL"
+                      x-model="manualpasteURL"
+                      placeholder="URL ..."
+                      required
+                    />
+                    <label for="manualpasteTitle">Title</label>
+                    <input
+                      type="text"
+                      id="manualpasteTitle"
+                      name="manualpasteTitle"
+                      x-model="manualpasteTitle"
+                      placeholder="Title ..."
+                      required
+                    />
+                  </div>
+                </template>
+                <template x-if="addType==='raw' || addType==='manual'">
+                  <button
+                    type="button"
+                    class="active-button"
+                    @click="addBookmark(addType)"
+                  >
+                    Save
+                  </button>
+                </template>
+                <template x-if="addType==='import'">
+                  <button
+                    type="button"
+                    class="active-button"
+                    @click="importData(rawpaste)"
+                  >
+                    Save
+                  </button>
+                </template>
+              </form>
+            </div>
+          </template>
+          <!-- EXPORT -->
+          <template x-if="flagExport">
+            <div>
+              <h1>Export</h1>
+              <p class="c-dark">You can either download the raw file text with 'TEXT' button or backup database data with 'BACKUP' button</p>
+              <div class="duo-buttons">
+                <button type="button" class="active-button big-button" @click="exportToTxt()">TEXT</button>
+                <button type="button" class="active-button big-button" @click="exportDb()">BACKUP</button>
+              </div>
+            </div>
+          </template>
+          <!-- SETTINGS -->
+          <template x-if="flagSettings">
+            <div>
+              <h1>Settings</h1>
+              </form>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <main>
+      <table class="lm-table">
+        <thead>
+          <tr>
+            <th class="th-favicon fixed">#</th>
+            <th class="th-title">TITLE</th>
+            <th class="th-link">LINK</th>
+            <th class="th-category">CATEGORY</th>
+            <th class="th-tags">TAGS</th>
+            <th class="th-creation-date">DATE</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="item in items" :key="item">
+            <tr>
+              <td
+                @click="item.active = item.active ? false : true"
+                :class="{'lm-td-active': item.active}"
+              >
+                <!-- <img
+                  class="favicon"
+                  x-bind:src="getFaviconById(item.favicon)"
+                /> -->
+              </td>
+              <!--title="favicon"-->
+              <td
+                @click="item.active = item.active ? false : true"
+                :class="{'lm-td-active': item.active}"
+                class="description"
+                x-text="item.description"
+              ></td>
+              <!--:title="item.description"-->
+              <td
+                @click="item.active = item.active ? false : true"
+                :class="{'lm-td-active': item.active}"
+              >
+                <a class="link" x-bind:href="item.link">Link</a>
+              </td>
+              <!--:title="item.link"-->
+              <td
+                @click="item.active = item.active ? false : true"
+                :class="{'lm-td-active': item.active}"
+                class="category"
+                x-text="item.category"
+              ></td>
+              <!--:title="item.category"-->
+              <td
+                @click="item.active = item.active ? false : true"
+                :class="{'lm-td-active': item.active}"
+                class="tags"
+                x-text="item.tags"
+              ></td>
+              <!--:title="item.tags"-->
+              <td
+                @click="item.active = item.active ? false : true"
+                :class="{'lm-td-active': item.active}"
+                class="creationDate"
+                x-text="dayjs(item.creationDate.$d).locale(USER_I18N).format('DD/MM/YYYY HH:mm:ss')"
+              ></td>
+              <!--dayjs(item.creationDate).locale('fr').format()-->
+              <td @click="deleteDoc(item)">
+                <button type="button">
+                  <img
+                    width="16"
+                    height="16"
+                    src="assets/img/icons/settings-pink.svg"
+                    alt="settings"
+                  />
+                </button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>
