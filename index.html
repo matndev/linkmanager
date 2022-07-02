@@ -204,7 +204,7 @@
           </tr>
         </thead>
         <tbody>
-          <template x-for="item in items" :key="item">
+          <template x-for="item in items" :key="item._id">
             <tr>
               <td
                 @click="item.active = item.active ? false : true"

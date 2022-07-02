@@ -1,6 +1,6 @@
 "use strict";
 
-var { forkJoin } = rxjs;
+var { forkJoin, of } = rxjs;
 var { map, catchError } = rxjs.operators;
 var LocalizedFormat = dayjs_plugin_localizedFormat;
 // var LocalizedFormat = require("dayjs/plugin/localizedFormat");
@@ -83,6 +83,7 @@ window.app = function () {
       db.bulkDocs(docList)
         .then(function (result) {
           console.log("Import in PouchDB success ", result);
+          this.isModalOpen = false;
         })
         .catch(function (err) {
           console.log("Import in PouchDB failed ", err);
@@ -153,51 +154,39 @@ window.app = function () {
         };
         const blob = dataURItoBlob(res[2]);
 
-        forkJoin({
-          saveItem: db.post(item), //.pipe(map((res) => res), catchError(e => of('Oops1!'))),
-          saveAttachment: db.putAttachment(item.favicon, item.favicon + ".ico", blob, "image/x-icon"),
-          // .pipe(map((res) => res), catchError((e) => of("Oops2!"))),
-        }).subscribe((res) => {
-          console.log("Success: ", res);
-          forkJoin({
-            savedItem: db.get(res.saveItem.id),
-            savedAttachment: db.getAttachment(res.saveAttachment.id, res.saveAttachment.id + ".ico"),
-          }).subscribe((itemWithAttachment) => {
-            console.log("DB get item : ", itemWithAttachment);
-            const objectURL = URL.createObjectURL(itemWithAttachment.savedAttachment);
-            this.items.push({
-              ...itemWithAttachment.savedItem,
-              faviconImg: objectURL,
-            });
-            console.log("this.items: ", this.items);
-          });
-        });
+        const requests = {
+          saveItem: db.post(item),
+        };
 
-        // db.post(item)
-        // .then(function (item) {
-        //     console.log('after post item: ', item);
-        //     db.get(item.id).then(function (doc) {
-        //         console.log('doc favicon: ', doc.favicon);
-        //         return db.putAttachment(doc.favicon, doc.favicon+'.ico', blob, 'image/x-icon');
-        //       }).catch(function (err) {
-        //         console.log(err);
-        //         return null; // return existing doc
-        //       });
-        // })
-        // .then(function (item) {
-        //     console.log('after putAttachment item : ', item);
-        //     return db.get(item.favicon, {attachments: true});
-        // })
-        // .then(function (doc) {
-        //     console.log('doc: ', doc);
-        //     this.items.push(doc);
-        //     this.isModalOpen = false;
-        //     this.flagNewBookmark = false;
-        //     this.rawpaste = '';
-        // })
-        // .catch(function (err) {
-        //     console.log('POST error: ', err);
-        // });
+        let isFaviconExists = false;
+        db.getAttachment(item.favicon, item.favicon + ".ico")
+          .then(function (blobOrBuffer) {
+            // handle result
+            console.log("then getAttachment: ", blobOrBuffer);
+            isFaviconExists = true;
+          })
+          .catch(function (err) {
+            console.log("favicon not found");
+            requests.saveAttachment = db.putAttachment(item.favicon, item.favicon + ".ico", blob, "image/x-icon");
+          })
+          .finally((res) => {
+            forkJoin(requests).subscribe((res) => {
+              forkJoin({
+                savedItem: db.get(res.saveItem.id),
+                savedAttachment: db.getAttachment(item.favicon, isFaviconExists ? item.favicon + ".ico" : res.saveAttachment.id + ".ico"),
+              }).subscribe((itemWithAttachment) => {
+                console.log("DB get item : ", itemWithAttachment);
+                const objectURL = URL.createObjectURL(itemWithAttachment.savedAttachment);
+                this.items.push({
+                  ...itemWithAttachment.savedItem,
+                  faviconImg: objectURL,
+                });
+                console.log("this.items: ", this.items);
+                this.rawpaste = "";
+              });
+            });
+            this.isModalOpen = false;
+          });
       }
     },
     getFaviconById(id) {
