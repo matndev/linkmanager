@@ -3,7 +3,7 @@
   <head>
     <title>LinkManager</title>
     <meta charset="utf-8" />
-    <link href="style.css" rel="stylesheet" />
+    <link id="stylesheet" href="flat.css" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link
       rel="icon"
@@ -62,6 +62,16 @@
             alt="Settings"
           />
           <p class="tooltip">Settings</p>
+        </button>
+        <button class="toolbar-btn" @click="changeDesign()">
+          <!-- Change design -->
+          <img
+            width="24"
+            height="24"
+            src="assets/img/icons/brush.svg"
+            alt="Change design"
+          />
+          <p class="tooltip">Change design</p>
         </button>
       </menu>
     </header>
@@ -186,6 +196,17 @@
               </form>
             </div>
           </template>
+          <!-- OPTIONS LINK -->
+          <template x-if="flagOptionsLink">
+            <div>
+              <h1>Options</h1>
+              <div class="options-grid">
+                <button type="button">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </template>
@@ -251,7 +272,8 @@
                 x-text="dayjs(item.creationDate.$d).locale(USER_I18N).format('DD/MM/YYYY HH:mm:ss')"
               ></td>
               <!--dayjs(item.creationDate).locale('fr').format()-->
-              <td @click="deleteDoc(item)">
+              <!-- <td @click="deleteDoc(item)"> -->
+              <td class="table-item-menu" @click="openOptionsLinkModal(item)">
                 <button type="button">
                   <img
                     width="16"

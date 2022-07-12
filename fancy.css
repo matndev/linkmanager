@@ -1,0 +1,324 @@
+* {
+  /* margin: 0; */
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+@font-face {
+  font-family: "Karma Future";
+  src: url("font/KarmaFuture.ttf") format("truetype");
+}
+
+:root {
+  --color-grey-light: #e3e3e3;
+  --color-grey-dark: #6b6b6b;
+  --color-light-black: #1e1e1e;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-light-black);
+  font-family: "Roboto", sans-serif; /* 'Courier New' */
+  color: var(--color-grey-light);
+}
+
+button {
+  cursor: pointer;
+}
+
+.active-button {
+  width: 100px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background-color: rgb(65, 94, 149);
+  color: white;
+  font-weight: bold;
+}
+
+.active-button:hover {
+  background-color: cornflowerblue;
+}
+
+.big-button {
+  width: 200px !important;
+  height: 40px !important;
+}
+
+.duo-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.c-dark {
+  color: var(--color-grey-dark);
+}
+
+header {
+  height: 50px;
+  background-image: linear-gradient(to right, #2a5298 0%, #ab6ef0 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 20px;
+}
+
+header h3 {
+  /* text-shadow: -0.6em 0 red, 0.6em 0 cyan; ANAGLYPHE EFFECT */
+  font-family: "Karma Future", "Courier New";
+  font-weight: normal;
+  color: #e3e3e3;
+  font-size: 20px;
+  /* text-shadow: 1px 1px #fff; */
+}
+
+header input {
+  width: 400px;
+  background-color: transparent; /* 1rst: #31354e 2nd: #a0abe9;*/
+  /* border-radius: 10px; */
+  /* border: 1px solid #5f616e; */
+  border: none;
+  /* border-bottom: 1px solid gray; */
+  color: #bababa;
+  outline: none;
+}
+
+header input:focus {
+  color: white;
+}
+
+.toolbar-btn {
+  /* background-color: transparent;
+  border: 1px solid white;
+  color: #e3e3e3;
+  padding: 5px;
+  transition: all 0.5s ease-out; */
+  background-color: transparent;
+  border: none;
+}
+
+/* .toolbar-btn:hover {
+  background-color: white;
+  color: #ab6ef0;
+} */
+
+input[type="text"] {
+  padding: 5px;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+}
+
+.actions > button {
+  min-width: 50px;
+  position: relative;
+}
+
+.actions > button > p {
+  color: white;
+  padding: 0 10px;
+}
+
+.actions > button:last-child > .tooltip {
+  position: absolute;
+  left: 50%;
+  top: 25px;
+  transform: translateX(-100%);
+}
+
+.tooltip {
+  position: absolute;
+  opacity: 0;
+  z-index: 1;
+  left: 50%;
+  top: 25px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: #171717;
+  padding: 18px !important;
+  border-radius: 5px;
+  color: white;
+  transition: 1s;
+  overflow: hidden;
+  white-space: nowrap;
+  box-shadow: inset;
+  box-shadow: 0px 0px 3px #2d2d2d;
+  font-size: smaller;
+}
+
+.toolbar-btn:hover .tooltip {
+  opacity: 1;
+  transition: 0.2s;
+  transition-delay: 0.1s;
+}
+
+/* TABLE */
+.lm-table {
+  width: 100%;
+  /* font-size: 14px; */
+  border-collapse: collapse;
+}
+
+.lm-table thead {
+  height: 30px;
+}
+
+.lm-table thead > tr {
+  background-color: #363636;
+}
+
+.lm-table tbody > tr {
+  position: relative;
+}
+
+.lm-table tbody > tr:hover {
+  background-color: #3b3b3b; /*ab6ef0*/
+}
+
+.lm-table th {
+  text-align: left;
+  padding-left: 5px;
+}
+
+.lm-table td {
+  max-width: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 5px;
+}
+
+/* 
+PERMET D'AFFICHER MENU D'ICONE SUR LA DROITE AU SURVOL
+.lm-table td.last{
+    display: none;
+}
+
+.lm-table tr:hover td.last {
+    display:inline-block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-width: none !important;
+    text-align: right;
+} */
+
+.lm-table td:last-child {
+  width: 16px !important;
+}
+
+.lm-table td:last-child button {
+  background: transparent;
+  border: none;
+}
+
+.lm-td-active {
+  white-space: normal !important;
+}
+
+.lm-table .tags {
+  color: greenyellow;
+}
+
+.lm-table .th-favicon {
+  width: 20px;
+}
+
+.table-item-menu {
+  fill: #ab6ef0;
+}
+
+.favicon {
+  width: 16px;
+  height: 16px;
+}
+
+#rawpaste {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#add-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#add-modal:first-child {
+  display: flex;
+}
+
+/** 
+* Extract from:
+* https://codepen.io/timothylong/pen/HhAer?editors=1100
+*/
+
+.modal-window {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 40%);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+  transition: all 0.3s;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-window > div {
+  width: 400px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background: #363636;
+  border-radius: 10px;
+}
+
+.modal-window header {
+  font-weight: bold;
+}
+
+.modal-window h1 {
+  font-size: 150%;
+  margin: 0 0 15px;
+}
+
+.modal-close {
+  color: #aaa;
+  line-height: 50px;
+  font-size: 80%;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: 0;
+  width: 70px;
+  text-decoration: none;
+}
+
+.modal-close:hover {
+  color: black;
+  cursor: pointer;
+}
+
+/** end */
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}

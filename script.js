@@ -33,6 +33,7 @@ window.app = function () {
   return {
     path: "assets/favicon/",
     exportJson: "",
+    stylesheet: "flat",
     // COMMAND
     command: "",
     // MODAL
@@ -42,6 +43,7 @@ window.app = function () {
     flagNewBookmark: false,
     flagExport: false,
     flagSettings: false,
+    flagOptionsLink: false,
     // TABLE
     trHover: false,
     items: [],
@@ -75,6 +77,11 @@ window.app = function () {
         console.log("INIT docs attachments: ", this.attachments);
       });
       tableInit();
+    },
+    disableFlags() {
+      this.flagNewBookmark = false;
+      this.flagExport = false;
+      this.flagSettings = false;
     },
     importData(json) {
       console.log("Import...");
@@ -124,6 +131,11 @@ window.app = function () {
       this.flagSettings = true;
       this.flagNewBookmark = false;
       this.flagExport = false;
+    },
+    changeDesign() {
+      if (this.stylesheet === "flat") this.stylesheet = "fancy";
+      else this.stylesheet = "flat";
+      document.getElementById("stylesheet").setAttribute("href", this.stylesheet + ".css");
     },
     addBookmark(type) {
       console.log("Add bookmark...");
@@ -194,6 +206,12 @@ window.app = function () {
       const attachments = this.$el.__x.getUnobservedData().attachments;
       const element = attachments.find((attachment) => attachment.id === id);
       return element && element.img ? element.img : this.path + id;
+    },
+    openOptionsLinkModal(proxy) {
+      console.log("proxy", proxy);
+      this.disableFlags();
+      this.isModalOpen = true;
+      this.flagOptionsLink = true;
     },
     deleteDoc(proxy) {
       const id = JSON.parse(JSON.stringify(proxy))._id; // Get rid of Proxy object

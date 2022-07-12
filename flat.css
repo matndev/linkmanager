@@ -4,22 +4,24 @@
   font-size: 13px;
 }
 
-@font-face {
-  font-family: "Karma Future";
-  src: url("font/KarmaFuture.ttf") format("truetype");
-}
-
 :root {
   --color-grey-light: #e3e3e3;
   --color-grey-dark: #6b6b6b;
+  --color-grey-normal: #d2d2d2;
+  --color-grey-normal-variation: #c3c3c3;
   --color-light-black: #1e1e1e;
+  --color-green-normal: #849e83;
 }
 
 body {
   margin: 0;
-  background-color: var(--color-light-black);
+  background-color: var(--color-grey-light);
   font-family: "Roboto", sans-serif; /* 'Courier New' */
-  color: var(--color-grey-light);
+  color: var(--color-light-black);
+}
+
+svg {
+  fill: currentColor;
 }
 
 button {
@@ -57,7 +59,7 @@ button {
 
 header {
   height: 50px;
-  background-image: linear-gradient(to right, #2a5298 0%, #ab6ef0 100%);
+  background-color: var(--color-green-normal);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -66,11 +68,10 @@ header {
 
 header h3 {
   /* text-shadow: -0.6em 0 red, 0.6em 0 cyan; ANAGLYPHE EFFECT */
-  font-family: "Karma Future", "Courier New";
-  font-weight: normal;
+  font-family: Arial, "Courier New";
+  font-weight: bold;
   color: #e3e3e3;
   font-size: 20px;
-  /* text-shadow: 1px 1px #fff; */
 }
 
 header input {
@@ -123,6 +124,13 @@ input[type="text"] {
   padding: 0 10px;
 }
 
+.actions > button:last-child > .tooltip {
+  position: absolute;
+  left: 50%;
+  top: 25px;
+  transform: translateX(-100%);
+}
+
 .tooltip {
   position: absolute;
   opacity: 0;
@@ -163,7 +171,7 @@ input[type="text"] {
 }
 
 .lm-table thead > tr {
-  background-color: #363636;
+  background-color: var(--color-grey-normal);
 }
 
 .lm-table tbody > tr {
@@ -171,12 +179,13 @@ input[type="text"] {
 }
 
 .lm-table tbody > tr:hover {
-  background-color: #3b3b3b; /*ab6ef0*/
+  background-color: var(--color-grey-normal); /*ab6ef0*/
 }
 
 .lm-table th {
   text-align: left;
   padding-left: 5px;
+  color: var(--color-grey-dark);
 }
 
 .lm-table td {
@@ -185,6 +194,16 @@ input[type="text"] {
   text-overflow: ellipsis;
   white-space: nowrap;
   padding: 5px;
+}
+
+.lm-table .table-separator {
+  background-image: linear-gradient(
+    90deg,
+    rgb(210, 210, 210) 30%,
+    rgb(178, 178, 178) 30%,
+    rgb(210, 210, 210) 70%,
+    rgb(210, 210, 210) 70%
+  ) !important;
 }
 
 /* 
