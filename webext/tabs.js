@@ -126,47 +126,80 @@
 // browser.browserAction.onClicked.removeListener(getInfos);
 
 function uuidv4() {
-  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
   );
 }
 
 function getLongestDashSuite(input) {
   const arr = input.match(/[-]+/g);
-  return arr != null && arr.length > 0 ? arr.reduce((r,s) => r > s.length ? r : s.length, 0) : 0;
+  return arr != null && arr.length > 0 ? arr.reduce((r, s) => (r > s.length ? r : s.length), 0) : 0;
 }
 
 // let faviconURL = '';
-var activeTabPromise = browser.tabs.query({active: true, currentWindow: true});
-    activeTabPromise.then((tabs) => {
-        for (const tab of tabs) {
-          console.log(`url: ${tab.url}\ntitle: ${tab.title}\nfavicon: ${tab.favIconUrl}`);
-          const faviconURL = tab.favIconUrl;
-          // const idFavicon = downloadFavicon(faviconURL);
+var activeTabPromise = browser.tabs.query({ active: true, currentWindow: true });
+activeTabPromise.then((tabs) => {
+  for (const tab of tabs) {
+    console.log(`url: ${tab.url}\ntitle: ${tab.title}\nfavicon: ${tab.favIconUrl}`);
+    const faviconURL = tab.favIconUrl;
+    // const idFavicon = downloadFavicon(faviconURL);
 
-          let lengthUrl = getLongestDashSuite(tab.url);
-          let lengthTitle = getLongestDashSuite(tab.title);
-          const length = lengthUrl > lengthTitle ? lengthUrl+1 : lengthTitle+1;
+    let lengthUrl = getLongestDashSuite(tab.url);
+    let lengthTitle = getLongestDashSuite(tab.title);
+    const length = lengthUrl > lengthTitle ? lengthUrl + 1 : lengthTitle + 1;
 
-          const output = tab.url + '-'.repeat(length) + tab.title + '-'.repeat(length) + faviconURL; // idFavicon
-          const infosTag = document.getElementById('infos');
-          infosTag.innerText = output;
+    const output = tab.url + "-".repeat(length) + tab.title + "-".repeat(length) + faviconURL; // idFavicon
+    const infosTag = document.getElementById("infos");
+    infosTag.innerText = output;
 
-          navigator.clipboard.writeText(output).then(function() {
-            console.log('copy to clipboard success..');
-          }, function() {
-            console.log('copy to clipboard failed..');
+    browser.tabs.query({ currentWindow: true }).then((tabs) => {
+      console.log("tabs: ", tabs);
+      const regex = new RegExp("^(file:/*).*(LinkManager).*(.html)");
+      for (const tab of tabs) {
+        if (regex.test(tab.url)) {
+          function onExecuted(result) {
+            console.log(`clipboard content injected`);
+          }
+
+          function onError(error) {
+            console.error(`Error: ${error}`);
+          }
+
+          const dataFromClipboard =
+            'const div = document.createElement("div");' +
+            'div.className = "clipboard";' +
+            'div.textContent = "' +
+            output +
+            '";' +
+            'div.style.display = "none";' +
+            "document.body.appendChild(div);" +
+            "undefined;";
+
+          const executing = browser.tabs.executeScript(tab.id, {
+            code: dataFromClipboard,
           });
-
+          executing.then(onExecuted, onError);
         }
+      }
     });
 
+    navigator.clipboard.writeText(output).then(
+      function () {
+        console.log("copy to clipboard success..");
+      },
+      function () {
+        console.log("copy to clipboard failed..");
+      }
+    );
+  }
+});
+
 function downloadFavicon(faviconURL) {
-  const id = 'lm-'+uuidv4()+'.ico';
+  const id = "lm-" + uuidv4() + ".ico";
   browser.runtime.sendMessage({
-    "type": "downloadFavicon",
-    "faviconURL": faviconURL,
-    "filename": id
+    type: "downloadFavicon",
+    faviconURL: faviconURL,
+    filename: id,
   });
   return id;
 }

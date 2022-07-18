@@ -39,7 +39,6 @@ window.app = function () {
     // MODAL
     isModalOpen: false,
     addType: "raw",
-    rawpaste: "",
     flagNewBookmark: false,
     flagExport: false,
     flagSettings: false,
@@ -49,17 +48,6 @@ window.app = function () {
     items: [],
     attachments: [],
     init() {
-      // forkJoin({
-      //     items: db.allDocs({include_docs: true}),
-      //     attachments: db.allDocs({attachments: true})
-      // })
-      // .subscribe(result => {
-      //     console.log('INIT result  : ', result);
-      //     this.items = result.items.rows;
-      //     this.attachments = result.attachments.rows;
-      //     console.log('INIT docs items: ', this.items);
-      //     console.log('INIT docs attachments: ', this.attachments);
-      // });
       db.allDocs({ include_docs: true, attachments: true, binary: true }, (error, result) => {
         if (error) {
           console.log(error);
@@ -137,69 +125,56 @@ window.app = function () {
       else this.stylesheet = "flat";
       document.getElementById("stylesheet").setAttribute("href", this.stylesheet + ".css");
     },
-    addBookmark(type) {
+    async addBookmark(data) {
       console.log("Add bookmark...");
-      this.isModalOpen = true;
-      this.flagExport = false;
-      this.flagNewBookmark = true;
-      this.flagSettings = false;
-      if (type === "raw") {
-        const lengthDash = getLongestDashSuite(this.rawpaste);
-        const res = this.rawpaste.split("-".repeat(lengthDash));
-        // let item = {};
-        // const blob = null;
-        // for (let i = 0; i < res.length; i++) {
-        //     if (i == 0) { item.link = res[i]; item.favicon = getDomainFromURL(res[i]); }
-        //     if (i == 1) { item.description = res[i] }
-        //     if (i == 2) { blob = dataURItoBlob(res[i]) }
-        // }
-        const item = {
-          link: res[0],
-          description: res[1],
-          favicon: getDomainFromURL(res[0]), // domain
-          creationDate: dayjs(),
-          domain: "",
-          category: "",
-          tags: "",
-          visible: true,
-          active: false,
-        };
-        const blob = dataURItoBlob(res[2]);
+      const lengthDash = getLongestDashSuite(data);
+      const res = data.split("-".repeat(lengthDash));
+      const item = {
+        link: res[0],
+        description: res[1],
+        favicon: getDomainFromURL(res[0]), // domain
+        creationDate: dayjs(),
+        domain: "",
+        category: "",
+        tags: "",
+        visible: true,
+        active: false,
+      };
+      const blob = dataURItoBlob(res[2]);
 
-        const requests = {
-          saveItem: db.post(item),
-        };
+      const requests = {
+        saveItem: db.post(item),
+      };
 
-        let isFaviconExists = false;
-        db.getAttachment(item.favicon, item.favicon + ".ico")
-          .then(function (blobOrBuffer) {
-            // handle result
-            console.log("then getAttachment: ", blobOrBuffer);
-            isFaviconExists = true;
-          })
-          .catch(function (err) {
-            console.log("favicon not found");
-            requests.saveAttachment = db.putAttachment(item.favicon, item.favicon + ".ico", blob, "image/x-icon");
-          })
-          .finally((res) => {
-            forkJoin(requests).subscribe((res) => {
-              forkJoin({
-                savedItem: db.get(res.saveItem.id),
-                savedAttachment: db.getAttachment(item.favicon, isFaviconExists ? item.favicon + ".ico" : res.saveAttachment.id + ".ico"),
-              }).subscribe((itemWithAttachment) => {
-                console.log("DB get item : ", itemWithAttachment);
-                const objectURL = URL.createObjectURL(itemWithAttachment.savedAttachment);
-                this.items.push({
-                  ...itemWithAttachment.savedItem,
-                  faviconImg: objectURL,
-                });
-                console.log("this.items: ", this.items);
-                this.rawpaste = "";
+      let isFaviconExists = false;
+      db.getAttachment(item.favicon, item.favicon + ".ico")
+        .then(function (blobOrBuffer) {
+          // handle result
+          console.log("then getAttachment: ", blobOrBuffer);
+          isFaviconExists = true;
+        })
+        .catch(function (err) {
+          console.log("favicon not found");
+          requests.saveAttachment = db.putAttachment(item.favicon, item.favicon + ".ico", blob, "image/x-icon");
+        })
+        .finally((res) => {
+          forkJoin(requests).subscribe((res) => {
+            forkJoin({
+              savedItem: db.get(res.saveItem.id),
+              savedAttachment: db.getAttachment(item.favicon, isFaviconExists ? item.favicon + ".ico" : res.saveAttachment.id + ".ico"),
+            }).subscribe((itemWithAttachment) => {
+              console.log("DB get item : ", itemWithAttachment);
+              const objectURL = URL.createObjectURL(itemWithAttachment.savedAttachment);
+              this.items.push({
+                ...itemWithAttachment.savedItem,
+                faviconImg: objectURL,
               });
+              console.log("this.items: ", this.items);
             });
-            this.isModalOpen = false;
           });
-      }
+          this.isModalOpen = false;
+        });
+      // }
     },
     getFaviconById(id) {
       if (!this.$el.__x) return this.path + id;
@@ -326,3 +301,25 @@ function saveFile(filename, data) {
     URL.revokeObjectURL(elem.href);
   }
 }
+
+/**
+ * Watch DOM events for clipboard user click from Web extension
+ */
+function observeNewCopyFromExtension() {
+  var targetNode = document;
+  var config = { subtree: true, attributes: false, childList: true };
+
+  var callback = function (mutationsList) {
+    for (var mutation of mutationsList) {
+      if (mutation.type == "childList" && mutation.addedNodes[0] && mutation.addedNodes[0].className === "clipboard") {
+        const nodeData = mutation.addedNodes[0].innerText;
+        window.app().addBookmark(nodeData);
+      }
+    }
+  };
+
+  var observer = new MutationObserver(callback);
+  observer.observe(targetNode, config);
+  // observer.disconnect();
+}
+observeNewCopyFromExtension();

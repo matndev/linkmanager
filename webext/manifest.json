@@ -5,7 +5,7 @@
     }
   },
   "background": {
-      "scripts": ["background.js"]
+    "scripts": ["background.js"]
   },
   "icons": {
     "48": "../assets/img/linkmanager-logo-48.png",
@@ -24,12 +24,6 @@
   "homepage_url": "https://github.com/mdn/webextensions-examples/tree/master/tabs-tabs-tabs",
   "manifest_version": 2,
   "name": "LinkManager",
-  "permissions": [
-    "tabs",
-    "downloads",
-    "downloads.open",
-    "clipboardWrite",
-    "clipboardRead"
-  ],
+  "permissions": ["tabs", "downloads", "downloads.open", "clipboardWrite", "clipboardRead", "<all_urls>"],
   "version": "1.0"
 }
