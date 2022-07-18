@@ -64,6 +64,7 @@ window.app = function () {
         console.log("INIT docs attachments: ", this.attachments);
       });
       tableInit();
+      this.observeNewCopyFromExtension();
     },
     disableFlags() {
       this.flagNewBookmark = false;
@@ -168,10 +169,8 @@ window.app = function () {
                 ...itemWithAttachment.savedItem,
                 faviconImg: objectURL,
               });
-              console.log("this.items: ", this.items);
             });
           });
-          this.isModalOpen = false;
         });
       // }
     },
@@ -182,7 +181,6 @@ window.app = function () {
       return element && element.img ? element.img : this.path + id;
     },
     openOptionsLinkModal(proxy) {
-      console.log("proxy", proxy);
       this.disableFlags();
       this.isModalOpen = true;
       this.flagOptionsLink = true;
@@ -200,6 +198,27 @@ window.app = function () {
         .catch((err) => {
           console.log(err);
         });
+    },
+    /**
+     * Watch DOM events for clipboard user click from Web extension
+     */
+    observeNewCopyFromExtension() {
+      var targetNode = document;
+      var config = { subtree: true, attributes: false, childList: true };
+      var self = this;
+
+      var callback = function (mutationsList) {
+        for (var mutation of mutationsList) {
+          if (mutation.type == "childList" && mutation.addedNodes[0] && mutation.addedNodes[0].className === "clipboard") {
+            const nodeData = mutation.addedNodes[0].innerText;
+            self.addBookmark(nodeData);
+          }
+        }
+      };
+
+      var observer = new MutationObserver(callback);
+      observer.observe(targetNode, config);
+      // observer.disconnect();
     },
   };
 };
@@ -300,25 +319,3 @@ function saveFile(filename, data) {
     URL.revokeObjectURL(elem.href);
   }
 }
-
-/**
- * Watch DOM events for clipboard user click from Web extension
- */
-function observeNewCopyFromExtension() {
-  var targetNode = document;
-  var config = { subtree: true, attributes: false, childList: true };
-
-  var callback = function (mutationsList) {
-    for (var mutation of mutationsList) {
-      if (mutation.type == "childList" && mutation.addedNodes[0] && mutation.addedNodes[0].className === "clipboard") {
-        const nodeData = mutation.addedNodes[0].innerText;
-        window.app().addBookmark(nodeData);
-      }
-    }
-  };
-
-  var observer = new MutationObserver(callback);
-  observer.observe(targetNode, config);
-  // observer.disconnect();
-}
-observeNewCopyFromExtension();
