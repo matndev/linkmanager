@@ -150,7 +150,11 @@ activeTabPromise.then((tabs) => {
 
     const output = tab.url + "-".repeat(length) + tab.title + "-".repeat(length) + faviconURL; // idFavicon
     const infosTag = document.getElementById("infos");
-    infosTag.innerText = output;
+    infosTag.style.display = "flex";
+    infosTag.style.gap = "10px";
+    infosTag.style.justifyContent = "center";
+    infosTag.style.alignItems = "center";
+    infosTag.innerHTML = '<p>Bookmark added</p><img src="icons/verifier.png" width="24px" height="24px" />';
 
     browser.tabs.query({ currentWindow: true }).then((tabs) => {
       console.log("tabs: ", tabs);

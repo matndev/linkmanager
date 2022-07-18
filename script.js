@@ -38,7 +38,6 @@ window.app = function () {
     command: "",
     // MODAL
     isModalOpen: false,
-    addType: "raw",
     flagNewBookmark: false,
     flagExport: false,
     flagSettings: false,

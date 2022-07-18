@@ -87,48 +87,6 @@
             <div>
               <h1>Add / Import bookmarks</h1>
               <form id="add-modal">
-                <div>
-                  <label for="raw">Raw</label>
-                  <input
-                    type="radio"
-                    id="raw"
-                    name="raw"
-                    value="raw"
-                    @click="addType='raw'"
-                    checked
-                  />
-
-                  <label for="importData">Import</label>
-                  <input
-                    type="radio"
-                    id="importData"
-                    name="importData"
-                    value="importData"
-                    @click="addType='import'"
-                  />
-
-                  <label for="manual">Manual</label>
-                  <input
-                    type="radio"
-                    id="manual"
-                    name="manual"
-                    value="manual"
-                    @click="addType='manual'"
-                  />
-                </div>
-                <template x-if="addType==='raw' || addType==='import'">
-                  <div style="width: 100%; height: 100%">
-                    <textarea
-                      id="rawpaste"
-                      name="rawpaste"
-                      rows="5"
-                      cols="5"
-                      x-model="rawpaste"
-                      required
-                    ></textarea>
-                  </div>
-                </template>
-                <template x-if="addType==='manual'">
                   <div
                     style="
                       width: 100%;
@@ -156,25 +114,13 @@
                       required
                     />
                   </div>
-                </template>
-                <template x-if="addType==='raw' || addType==='manual'">
                   <button
                     type="button"
                     class="active-button"
-                    @click="addBookmark(addType)"
+                    @click="addBookmark(data)"
                   >
                     Save
                   </button>
-                </template>
-                <template x-if="addType==='import'">
-                  <button
-                    type="button"
-                    class="active-button"
-                    @click="importData(rawpaste)"
-                  >
-                    Save
-                  </button>
-                </template>
               </form>
             </div>
           </template>
