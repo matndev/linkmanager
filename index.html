@@ -144,10 +144,10 @@
           </template>
           <!-- OPTIONS LINK -->
           <template x-if="flagOptionsLink">
-            <div>
+            <div class="options-link">
               <h1>Options</h1>
               <div class="options-grid">
-                <button type="button">
+                <button type="button" @click="deleteDoc()">
                   Delete
                 </button>
               </div>

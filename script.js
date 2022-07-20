@@ -46,6 +46,7 @@ window.app = function () {
     trHover: false,
     items: [],
     attachments: [],
+    currentItem: null,
     init() {
       db.allDocs({ include_docs: true, attachments: true, binary: true }, (error, result) => {
         if (error) {
@@ -184,9 +185,16 @@ window.app = function () {
       this.disableFlags();
       this.isModalOpen = true;
       this.flagOptionsLink = true;
+      this.currentItem = proxy;
     },
-    deleteDoc(proxy) {
-      const id = JSON.parse(JSON.stringify(proxy))._id; // Get rid of Proxy object
+    closeOptionsLinkModal() {
+      this.isModalOpen = false;
+      this.flagOptionsLink = false;
+      this.currentItem = null;
+    },
+    deleteDoc() {
+      // proxy
+      const id = JSON.parse(JSON.stringify(this.currentItem))._id; // Get rid of Proxy object
       db.get(id)
         .then(function (doc) {
           return db.remove(doc);
@@ -197,7 +205,8 @@ window.app = function () {
         })
         .catch((err) => {
           console.log(err);
-        });
+        })
+        .finally(() => this.closeOptionsLinkModal());
     },
     /**
      * Watch DOM events for clipboard user click from Web extension

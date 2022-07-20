@@ -319,6 +319,33 @@ PERMET D'AFFICHER MENU D'ICONE SUR LA DROITE AU SURVOL
   cursor: pointer;
 }
 
+.options-link {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: var(--color-grey-dark);
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
+  grid-auto-rows: minmax(50px, auto);
+}
+
+.options-grid button {
+  background-color: var(--color-grey-light);
+  border: none;
+  border-radius: 10px;
+  color: var(--color-grey-dark);
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.options-grid button:hover {
+  background-color: var(--color-green-normal);
+}
+
 /** end */
 
 .noselect {
