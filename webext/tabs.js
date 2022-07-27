@@ -169,15 +169,7 @@ activeTabPromise.then((tabs) => {
             console.error(`Error: ${error}`);
           }
 
-          const dataFromClipboard =
-            'const div = document.createElement("div");' +
-            'div.className = "clipboard";' +
-            'div.textContent = "' +
-            output +
-            '";' +
-            'div.style.display = "none";' +
-            "document.body.appendChild(div);" +
-            "undefined;";
+          const dataFromClipboard = 'document.getElementById("clipboard")' + '.textContent = "' + output + '";' + "undefined;";
 
           const executing = browser.tabs.executeScript(tab.id, {
             code: dataFromClipboard,

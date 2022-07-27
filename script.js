@@ -218,8 +218,8 @@ window.app = function () {
 
       var callback = function (mutationsList) {
         for (var mutation of mutationsList) {
-          if (mutation.type == "childList" && mutation.addedNodes[0] && mutation.addedNodes[0].className === "clipboard") {
-            const nodeData = mutation.addedNodes[0].innerText;
+          if (mutation.type == "childList" && mutation.addedNodes[0] && mutation.addedNodes[0].parentElement.id === "clipboard") {
+            const nodeData = mutation.addedNodes[0].textContent;
             self.addBookmark(nodeData);
           }
         }
